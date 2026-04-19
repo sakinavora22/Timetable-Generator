@@ -9,9 +9,30 @@ from algorithms.priority_queue import priority_queue_schedule
 from algorithms.sjf import generate_sjf
 from api.timetable_model import validate_subjects, normalize_subject
 from utils.helpers import measure_time, get_complexity
+from utils.email_sender import send_timetable_email
 
 # create a blueprint so these routes can be registered with the main app
 timetable_bp = Blueprint("timetable", __name__)
+
+
+@timetable_bp.route("/send_email", methods=["POST"])
+def send_email():
+    try:
+        data = request.json
+        email = data.get("email")
+        timetable = data.get("timetable")
+
+        if not email or not timetable:
+            return jsonify({"error": "email and timetable data are required"}), 400
+
+        success, message = send_timetable_email(email, timetable)
+        
+        if success:
+            return jsonify({"message": "email sent successfully!"})
+        else:
+            return jsonify({"error": f"failed to send email: {message}"}), 500
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # post /api/generate — takes a list of subjects and an algorithm choice,

@@ -3,8 +3,12 @@
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
+from dotenv import load_dotenv
 from api.timetable_routes import timetable_bp
 import os
+
+# load environment variables from .env file
+load_dotenv()
 
 # create the flask app instance
 app = Flask(__name__)

@@ -326,6 +326,13 @@
         <div class="card-title">Schedule</div>
         <div id="stats-row" class="stats-row" style="display:none"></div>
         <div id="timetable-output"></div>
+        <div id="email-section" style="display:none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #dde3df;">
+          <div style="font-size: 0.8rem; font-weight: 600; color: #555; margin-bottom: 0.5rem;">Send to Email</div>
+          <div style="display: flex; gap: 0.5rem;">
+            <input type="email" id="user-email" placeholder="Enter your email address" style="margin-bottom: 0; flex: 1;" />
+            <button class="btn btn-primary" id="email-btn" style="margin-top: 0; width: auto; padding: 0 1rem;" onclick="sendEmail()">Send</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -348,6 +355,7 @@
   let subjects = [];
   let selectedAlgo = "greedy";
   let subjectColorMap = {};
+  let currentTimetableData = null;
 
   function init() {
     renderAlgos();
@@ -457,7 +465,9 @@
 
     if (result.error) { showToast("Error: " + result.error); return; }
 
+    currentTimetableData = result.timetable;
     renderTimetable(result);
+    document.getElementById("email-section").style.display = "block";
     showToast("Timetable generated");
   }
 
@@ -554,6 +564,36 @@
     t.textContent = msg;
     t.style.display = 'block';
     setTimeout(() => t.style.display = 'none', 2000);
+  }
+
+  async function sendEmail() {
+    const email = document.getElementById("user-email").value.trim();
+    if (!email) { showToast("Please enter an email address"); return; }
+    if (!currentTimetableData) { showToast("No timetable generated yet"); return; }
+
+    const btn = document.getElementById("email-btn");
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    try {
+      const res = await fetch("http://localhost:5000/api/send_email", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ email: email, timetable: currentTimetableData })
+      });
+      const result = await res.json();
+      
+      if (result.error) {
+        showToast("Error: " + result.error);
+      } else {
+        showToast(result.message || "Email sent!");
+      }
+    } catch (e) {
+      showToast("Network error while sending email.");
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Send";
   }
 
   init();
