@@ -1,6 +1,6 @@
 # Timetable Generator
 
-An AI-powered timetable scheduling application built with Flask and Vanilla JavaScript.
+An algorithmic timetable scheduling application built with Flask and Vanilla JavaScript.
 
 ## Features
 - Dynamic scheduling algorithms including:
