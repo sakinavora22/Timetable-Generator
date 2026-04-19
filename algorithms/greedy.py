@@ -6,7 +6,7 @@
 # time complexity:  o(n log n) — dominated by sorting
 # space complexity: o(n)
 
-from config import DAYS, TIME_SLOTS
+from utils.config import DAYS, TIME_SLOTS
 
 
 def generate_greedy(subjects):

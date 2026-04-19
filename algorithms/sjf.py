@@ -5,7 +5,7 @@
 # time complexity:  o(n log n) — due to sorting
 # space complexity: o(n)
 
-from config import DAYS, TIME_SLOTS
+from utils.config import DAYS, TIME_SLOTS
 
 
 def generate_sjf(subjects):

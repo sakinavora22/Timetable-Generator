@@ -6,7 +6,7 @@
 # time complexity:  o(s^n) — s = number of slots, n = subjects
 # space complexity: o(n)   — recursion depth
 
-from config import DAYS, TIME_SLOTS
+from utils.config import DAYS, TIME_SLOTS
 
 
 def generate_backtracking(subjects):

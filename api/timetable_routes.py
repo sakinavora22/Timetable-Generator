@@ -3,12 +3,12 @@
 # each route handles a specific action: generating schedules, listing algorithms, or health checks
 
 from flask import Blueprint, request, jsonify
-from greedy import generate_greedy
-from backtracking import generate_backtracking
-from priority_queue import priority_queue_schedule
-from sjf import generate_sjf
-from timetable_model import validate_subjects, normalize_subject
-from helpers import measure_time, get_complexity
+from algorithms.greedy import generate_greedy
+from algorithms.backtracking import generate_backtracking
+from algorithms.priority_queue import priority_queue_schedule
+from algorithms.sjf import generate_sjf
+from api.timetable_model import validate_subjects, normalize_subject
+from utils.helpers import measure_time, get_complexity
 
 # create a blueprint so these routes can be registered with the main app
 timetable_bp = Blueprint("timetable", __name__)

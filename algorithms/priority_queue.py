@@ -7,7 +7,7 @@
 # space complexity: o(n)
 
 import heapq
-from config import DAYS, TIME_SLOTS
+from utils.config import DAYS, TIME_SLOTS
 
 
 def priority_queue_schedule(subjects):

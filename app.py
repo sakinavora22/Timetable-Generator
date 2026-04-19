@@ -3,7 +3,7 @@
 
 from flask import Flask, send_from_directory
 from flask_cors import CORS
-from timetable_routes import timetable_bp
+from api.timetable_routes import timetable_bp
 import os
 
 # create the flask app instance
@@ -19,7 +19,7 @@ app.register_blueprint(timetable_bp, url_prefix="/api")
 # serve the frontend html when someone visits the root url
 @app.route("/")
 def serve_index():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "index.html")
+    return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), "frontend"), "index.html")
 
 
 # start the server on port 5000 when this file is run directly
