@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Timetable Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f4f6f5;
+      color: #333;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .app { max-width: 1060px; margin: 0 auto; }
+
+    header {
+      margin-bottom: 2rem;
+    }
+
+    header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2a2a2a;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    @media (max-width: 768px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: #fff;
+      border: 1px solid #dde3df;
+      border-radius: 8px;
+      padding: 1.25rem;
+    }
+
+    .card + .card { margin-top: 1rem; }
+
+    .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+
+    /* FORM */
+    input, select {
+      width: 100%;
+      background: #f7f9f8;
+      border: 1px solid #dde3df;
+      border-radius: 5px;
+      color: #333;
+      font-family: inherit;
+      font-size: 0.85rem;
+      padding: 0.5rem 0.65rem;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 0.6rem;
+    }
+
+    input:focus, select:focus {
+      border-color: #6aae8e;
+    }
+
+    .col-labels {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+      gap: 0.4rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .col-labels span {
+      font-size: 0.68rem;
+      font-weight: 500;
+      color: #888;
+    }
+
+    .subject-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+      gap: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .subject-row input { margin-bottom: 0; }
+
+    .btn-del {
+      background: none;
+      border: 1px solid #e0e0e0;
+      color: #999;
+      width: 32px; height: 34px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .btn-del:hover { color: #c55; border-color: #c55; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s;
+    }
+
+    .btn-primary {
+      background: #4a7fc4;
+      color: #fff;
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 0.5rem;
+    }
+
+    .btn-primary:hover { background: #3f6fb3; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-outline {
+      background: #fff;
+      border: 1px solid #dde3df;
+      color: #666;
+    }
+
+    .btn-outline:hover { border-color: #4daa80; color: #4daa80; }
+
+    .btn-add {
+      background: none;
+      border: 1px dashed #ccc;
+      color: #999;
+      width: 100%;
+      margin-top: 0.25rem;
+    }
+
+    .btn-add:hover { border-color: #4daa80; color: #4daa80; }
+
+    /* ALGORITHM GRID */
+    .algo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 500px) { .algo-grid { grid-template-columns: repeat(2, 1fr); } }
+
+    .algo-card {
+      background: #f7f9f8;
+      border: 1px solid #dde3df;
+      border-radius: 6px;
+      padding: 0.6rem 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: #555;
+      transition: border-color 0.15s;
+    }
+
+    .algo-card:hover { border-color: #4daa80; }
+
+    .algo-card.active {
+      border-color: #4daa80;
+      background: #edf7f1;
+      color: #3a8f66;
+      font-weight: 600;
+    }
+
+    /* STATS */
+    .stats-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1rem;
+    }
+
+    .stat-chip {
+      font-size: 0.7rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      background: #f0f5f2;
+      color: #666;
+    }
+
+    .stat-chip span { color: #3a8f66; font-weight: 600; }
+
+    /* TIMETABLE */
+    .timetable-grid {
+      display: grid;
+      grid-template-columns: 80px repeat(6, 1fr);
+      gap: 1px;
+      background: #dde3df;
+      border: 1px solid #dde3df;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 0.7rem;
+    }
+
+    .tt-cell {
+      background: #fff;
+      padding: 0.4rem;
+      min-height: 38px;
+      display: flex;
+      align-items: center;
+    }
+
+    .tt-cell.header-cell {
+      background: #f0f5f2;
+      font-weight: 600;
+      color: #555;
+      justify-content: center;
+      font-size: 0.68rem;
+    }
+
+    .tt-cell.time-cell {
+      color: #888;
+      font-size: 0.65rem;
+    }
+
+    .tt-cell.subject-cell {
+      padding: 0.3rem;
+    }
+
+    .subject-tag {
+      color: #fff;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.63rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+
+
+    /* LEGEND */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.75rem;
+    }
+
+    .legend-item {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #fff;
+      border: 1px solid #dde3df;
+      border-radius: 6px;
+      padding: 0.7rem 1.2rem;
+      font-size: 0.8rem;
+      color: #3a8f66;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    @media (max-width: 700px) {
+      .timetable-grid { grid-template-columns: 60px repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>Timetable Generator</h1>
+  </header>
+
+  <div class="grid-2">
+    <div>
+      <div class="card">
+        <div class="card-title">Subjects</div>
+        <div class="col-labels">
+          <span>Name</span>
+          <span>Hours</span>
+          <span>Priority</span>
+          <span>Deadline</span>
+          <span></span>
+        </div>
+        <div id="subjects-list"></div>
+        <button class="btn btn-add" onclick="addSubject()">+ Add subject</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Scheduling Method</div>
+        <div class="algo-grid" id="algo-grid"></div>
+      </div>
+
+      <div style="margin-top:0.75rem;">
+        <button class="btn btn-primary" id="generate-btn" onclick="generate()">Generate Timetable</button>
+        <div style="margin-top:0.5rem;display:flex;gap:0.5rem;">
+          <button class="btn btn-outline" style="flex:1" onclick="loadSample()">Load Sample</button>
+          <button class="btn btn-outline" style="flex:1" onclick="clearAll()">Clear</button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="min-height:280px;">
+        <div class="card-title">Schedule</div>
+        <div id="stats-row" class="stats-row" style="display:none"></div>
+        <div id="timetable-output"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" style="display:none"></div>
+
+<script>
+  const ALGORITHMS = [
+    { id: "greedy",         name: "Priority First" },
+    { id: "backtracking",   name: "Best Fit Search" },
+    { id: "priority_queue", name: "Urgency Based" },
+    { id: "sjf",            name: "Shortest Job First" },
+  ];
+
+  const DAYS = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const TIMES = ["8:00 AM","9:00 AM","10:00 AM","11:00 AM","12:00 PM","1:00 PM","2:00 PM","3:00 PM","4:00 PM","5:00 PM"];
+  const COLORS = ["#4daa80","#5aafc4","#d4a056","#9b7ec8","#c76e6e","#6aaa56","#c4875a","#5a8fc4"];
+
+  let subjects = [];
+  let selectedAlgo = "greedy";
+  let subjectColorMap = {};
+
+  function init() {
+    renderAlgos();
+    loadSample();
+  }
+
+  function renderAlgos() {
+    const grid = document.getElementById("algo-grid");
+    grid.innerHTML = ALGORITHMS.map(a => `
+      <div class="algo-card ${a.id === selectedAlgo ? 'active' : ''}" onclick="selectAlgo('${a.id}')">
+        ${a.name}
+      </div>
+    `).join('');
+  }
+
+  function selectAlgo(id) {
+    selectedAlgo = id;
+    renderAlgos();
+  }
+
+  function addSubject(name="", time=1, priority=3, deadline=5) {
+    const id = Date.now() + Math.random();
+    subjects.push({ id, name, time, priority, deadline });
+    renderSubjects();
+  }
+
+  function removeSubject(id) {
+    subjects = subjects.filter(s => s.id !== id);
+    renderSubjects();
+  }
+
+  function renderSubjects() {
+    const list = document.getElementById("subjects-list");
+    list.innerHTML = subjects.map(s => `
+      <div class="subject-row" data-id="${s.id}">
+        <input type="text" value="${s.name}" placeholder="Subject name"
+          oninput="updateField(${s.id},'name',this.value)"/>
+        <input type="number" value="${s.time}" min="1" max="5"
+          oninput="updateField(${s.id},'time',+this.value)"/>
+        <input type="number" value="${s.priority}" min="1" max="5"
+          oninput="updateField(${s.id},'priority',+this.value)"/>
+        <input type="number" value="${s.deadline}" min="1" max="10"
+          oninput="updateField(${s.id},'deadline',+this.value)"/>
+        <button class="btn-del" onclick="removeSubject(${s.id})">×</button>
+      </div>
+    `).join('');
+  }
+
+  function updateField(id, field, value) {
+    const subj = subjects.find(s => s.id === id);
+    if (subj) subj[field] = value;
+  }
+
+  function loadSample() {
+    subjects = [];
+    const samples = [
+      {name:"Mathematics", time:3, priority:5, deadline:2},
+      {name:"Physics",     time:2, priority:4, deadline:3},
+      {name:"Chemistry",   time:2, priority:4, deadline:3},
+      {name:"Comp Science",time:3, priority:5, deadline:1},
+      {name:"English",     time:1, priority:2, deadline:5},
+      {name:"History",     time:1, priority:2, deadline:6},
+    ];
+    samples.forEach(s => addSubject(s.name, s.time, s.priority, s.deadline));
+  }
+
+  function clearAll() {
+    subjects = [];
+    renderSubjects();
+    document.getElementById("timetable-output").innerHTML = '';
+    document.getElementById("stats-row").style.display = 'none';
+  }
+
+  async function generate() {
+    const validSubjects = subjects.filter(s => s.name.trim());
+    if (validSubjects.length === 0) { showToast("Add at least one subject"); return; }
+
+    const btn = document.getElementById("generate-btn");
+    btn.disabled = true;
+    btn.textContent = "Generating...";
+
+    const payload = {
+      subjects: validSubjects.map(s => ({
+        name: s.name.trim(),
+        time: s.time || 1,
+        priority: s.priority || 1,
+        deadline: s.deadline || 5
+      })),
+      algorithm: selectedAlgo,
+      max_time: 20
+    };
+
+    let result;
+    try {
+      const res = await fetch("http://localhost:5000/api/generate", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify(payload)
+      });
+      result = await res.json();
+    } catch(e) {
+      result = simulateLocally(payload);
+    }
+
+    btn.disabled = false;
+    btn.textContent = "Generate Timetable";
+
+    if (result.error) { showToast("Error: " + result.error); return; }
+
+    renderTimetable(result);
+    showToast("Timetable generated");
+  }
+
+  function simulateLocally(payload) {
+    const { subjects, algorithm } = payload;
+    const allSlots = [];
+    DAYS.forEach(d => TIMES.forEach(t => allSlots.push([d,t])));
+
+    let sorted;
+    if (algorithm === "greedy" || algorithm === "priority_queue") {
+      sorted = [...subjects].sort((a,b) => (b.priority-a.priority) || (a.time-b.time));
+    } else if (algorithm === "sjf") {
+      sorted = [...subjects].sort((a,b) => (a.time-b.time) || (b.priority-a.priority));
+    } else {
+      sorted = [...subjects].sort((a,b) => b.priority-a.priority);
+    }
+
+    const timetable = [];
+    let si = 0;
+    sorted.forEach(subj => {
+      for(let h=0; h<(subj.time||1); h++) {
+        if (si >= allSlots.length) return;
+        timetable.push({ subject: subj.name, day: allSlots[si][0], time: allSlots[si][1], priority: subj.priority });
+        si++;
+      }
+    });
+
+    return { timetable, algorithm, subject_count: subjects.length };
+  }
+
+  function renderTimetable(data) {
+    const { timetable, algorithm } = data;
+
+    subjectColorMap = {};
+    let ci = 0;
+    timetable.forEach(e => {
+      if (!subjectColorMap[e.subject]) {
+        subjectColorMap[e.subject] = COLORS[ci % COLORS.length];
+        ci++;
+      }
+    });
+
+    const lookup = {};
+    timetable.forEach(e => {
+      const key = `${e.day}|${e.time}`;
+      if (!lookup[key]) lookup[key] = [];
+      lookup[key].push(e.subject);
+    });
+
+    const statsEl = document.getElementById("stats-row");
+    statsEl.style.display = 'flex';
+    const algo = ALGORITHMS.find(a => a.id === algorithm);
+    statsEl.innerHTML = `
+      <div class="stat-chip">Method: <span>${algo?.name || algorithm}</span></div>
+      <div class="stat-chip">Slots filled: <span>${timetable.length}</span></div>
+    `;
+
+    let html = '<div class="timetable-grid">';
+    html += '<div class="tt-cell header-cell">Time</div>';
+    DAYS.forEach(d => {
+      html += `<div class="tt-cell header-cell">${d.slice(0,3)}</div>`;
+    });
+
+    TIMES.forEach(time => {
+      html += `<div class="tt-cell time-cell">${time}</div>`;
+      DAYS.forEach(day => {
+        const key = `${day}|${time}`;
+        const subs = lookup[key] || [];
+        if (subs.length > 0) {
+          const color = subjectColorMap[subs[0]] || '#4daa80';
+          html += `<div class="tt-cell subject-cell">
+            <span class="subject-tag" style="background:${color}">
+              ${subs[0].length > 10 ? subs[0].slice(0,9)+'…' : subs[0]}
+            </span>
+          </div>`;
+        } else {
+          html += '<div class="tt-cell"></div>';
+        }
+      });
+    });
+    html += '</div>';
+
+    html += '<div class="legend">';
+    Object.entries(subjectColorMap).forEach(([name, color]) => {
+      html += `<span class="legend-item" style="background:${color}1a;color:${color}">${name}</span>`;
+    });
+    html += '</div>';
+
+    document.getElementById("timetable-output").innerHTML = html;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.display = 'block';
+    setTimeout(() => t.style.display = 'none', 2000);
+  }
+
+  init();
+</script>
+</body>
+</html>

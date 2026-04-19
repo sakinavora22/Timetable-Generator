@@ -1,0 +1,11 @@
+{
+  "sample_subjects": [
+    {"name": "Mathematics", "priority": 5, "time": 3, "deadline": 2},
+    {"name": "Physics", "priority": 4, "time": 2, "deadline": 3},
+    {"name": "Chemistry", "priority": 4, "time": 2, "deadline": 3},
+    {"name": "Computer Science", "priority": 5, "time": 3, "deadline": 1},
+    {"name": "English", "priority": 2, "time": 1, "deadline": 5},
+    {"name": "History", "priority": 2, "time": 1, "deadline": 6}
+  ],
+  "algorithm_options": ["greedy", "backtracking", "dp", "graph_coloring", "priority_queue", "sorting"]
+}
